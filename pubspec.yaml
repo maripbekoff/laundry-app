@@ -1,0 +1,51 @@
+name: laundry
+description: A new Flutter project.
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^3.0.10
+  cookie_jar: ^1.0.1
+  dio_cookie_manager: ^1.0.0
+  flutter_secure_storage: ^3.3.3
+  path_provider: ^1.6.14
+  cupertino_icons: ^0.1.3
+  json_annotation: ^3.0.1
+  cached_network_image: ^2.3.1
+  flutter_bloc: ^6.0.5
+
+dev_dependencies:
+  json_serializable: ^3.4.1
+  build_runner: 
+  flutter_test:
+    sdk: flutter
+
+dependency_overrides:
+  analyzer: '0.39.14'
+
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Laundry
+      fonts:
+        - asset: assets/icons/Laundry.ttf
+    - family: Museo Sans Cyrilic
+      fonts:
+        - asset: assets/fonts/Museo-Sans-Cyr/MuseoSansCyrl-Regular.otf
+          weight: 500
+        - asset: assets/fonts/Museo-Sans-Cyr/MuseoSansCyrl-Thin.otf
+          weight: 100
+        - asset: assets/fonts/Museo-Sans-Cyr/MuseoSansCyrl-Light.otf
+          weight: 300
+        - asset: assets/fonts/Museo-Sans-Cyr/MuseoSansCyrl-Bold.otf
+          weight: 700
+        - asset: assets/fonts/Museo-Sans-Cyr/MuseoSansCyrl-Black.otf
+          weight: 900
