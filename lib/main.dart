@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:laundry/blocs/cart/cart_bloc.dart';
 import 'package:laundry/utils/theme/theme.dart';
 
+import 'blocs/login/login_bloc.dart';
+import 'blocs/cart/cart_bloc.dart';
 import 'blocs/auth/auth_bloc.dart';
+import 'blocs/search/search_bloc.dart';
 import 'pages/auth/auth.dart';
 import 'pages/home/home.dart';
 
@@ -27,7 +29,14 @@ class MyApp extends StatelessWidget {
           create: (context) => AuthBloc()..add(AppStarted()),
         ),
         BlocProvider<CartBloc>(
-          create: (BuildContext context) => CartBloc(),
+          create: (BuildContext context) =>
+              CartBloc()..add(CartUninitialized()),
+        ),
+        BlocProvider<LoginBloc>(
+          create: (BuildContext context) => LoginBloc(),
+        ),
+        BlocProvider<SearchBloc>(
+          create: (BuildContext context) => SearchBloc(),
         ),
       ],
       child: CupertinoApp(

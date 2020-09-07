@@ -16,6 +16,7 @@ class _CartPageState extends State<CartPage> {
   List<Catalog> catalog = [];
   double amount = 0.0;
   CartBloc _cartBloc;
+  int count = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +51,9 @@ class _CartPageState extends State<CartPage> {
           } else if (state is CartEmpty) {
             catalog = state.catalog;
             amount = state.amount;
+          } else if (state is CartInit) {
+            catalog = state.catalog;
+            amount = state.amount;
           }
         },
         builder: (context, state) {
@@ -65,6 +69,8 @@ class _CartPageState extends State<CartPage> {
                     builder: (context, state) {
                       if (state is CartInitial)
                         return _buildEmptyCart();
+                      else if (state is CartInit)
+                        return _buildCartItems();
                       else if (state is CartEmpty)
                         return _buildEmptyCart();
                       else if (state is CartItemUpdated)
@@ -85,9 +91,9 @@ class _CartPageState extends State<CartPage> {
                       children: [
                         Text(
                           'Общая сумма $amount тг',
-                          style: TextStyle(fontWeight: FontWeight.w500),
+                          style: TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        Text('${catalog.length}'),
+                        Text('${catalog.length} вещи'),
                       ],
                     ),
                     SizedBox(height: 20),
@@ -96,24 +102,41 @@ class _CartPageState extends State<CartPage> {
                         'Оформить',
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
-                      onPressed: () {
-                        showCupertinoDialog(
-                          context: context,
-                          builder: (context) {
-                            return CupertinoAlertDialog(
-                              title: Text('Спасибо!'),
-                              content: Text(
-                                  'Вы успешно оформили доставку! Пожалуйста ожидайте.'),
-                              actions: [
-                                CupertinoDialogAction(
-                                    child: Text('ОК'),
-                                    onPressed: () =>
-                                        Navigator.of(context).pop()),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                      disabledColor: CupertinoColors.inactiveGray,
+                      onPressed: catalog.length != 0
+                          ? () {
+                              _cartBloc.add(ClearCart());
+                              
+                              print(
+                                  '---------------------------------------------');
+                              print(
+                                  'Вы оформили заказ ($count вещей на сумму $amount тг):');
+                              catalog.forEach((item) {
+                                print(
+                                    'Название: ${item.name}\nЦена: ${item.unit_price} тг\nUUID: ${item.uuid}');
+                                print('');
+                              });
+                              print(
+                                  '---------------------------------------------');
+                              showCupertinoDialog(
+                                context: context,
+                                builder: (context) {
+                                  return CupertinoAlertDialog(
+                                    title: Text('Спасибо!'),
+                                    content: Text(
+                                        'Вы успешно оформили доставку! Пожалуйста ожидайте.'),
+                                    actions: [
+                                      CupertinoDialogAction(
+                                        child: Text('ОК'),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          : null,
                     ),
                   ],
                 ),
@@ -139,7 +162,7 @@ class _CartPageState extends State<CartPage> {
         return SizedBox(height: 16);
       },
       itemBuilder: (BuildContext context, int index) {
-        return ItemWidget(catalog: catalog[index]);
+        return ItemWidget(catalog: catalog[index], isCartItem: true);
       },
     );
   }

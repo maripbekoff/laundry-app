@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:laundry/blocs/search/search_bloc.dart';
 import 'package:laundry/models/catalog.dart';
 import 'package:laundry/pages/laundry/widgets/category.dart';
 import 'package:laundry/pages/laundry/widgets/search_bar.dart';
 import 'package:laundry/repository/api.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LaundryPage extends StatefulWidget {
   LaundryPage({@required this.catalog});
@@ -14,12 +16,14 @@ class LaundryPage extends StatefulWidget {
 }
 
 class _LaundryPageState extends State<LaundryPage>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   final LaundryRepo laundryRepo = LaundryRepo();
   TextEditingController _searchTextController = new TextEditingController();
   FocusNode _searchFocusNode = new FocusNode();
   Animation _animation;
   AnimationController _animationController;
+
+  SearchBloc _searchBloc;
 
   @override
   void initState() {
@@ -44,6 +48,12 @@ class _LaundryPageState extends State<LaundryPage>
     _searchTextController.clear();
     _searchFocusNode.unfocus();
     _animationController.reverse();
+    _searchBloc.add(CloseSearchBar());
+  }
+
+  _search() {
+    _searchBloc.add(
+        SearchItem(catalog: widget.catalog, query: _searchTextController.text));
   }
 
   void _clearSearch() {
@@ -51,7 +61,15 @@ class _LaundryPageState extends State<LaundryPage>
   }
 
   @override
+  void dispose() {
+    _searchTextController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _searchBloc = context.bloc<SearchBloc>();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
       child: CupertinoPageScaffold(
@@ -63,36 +81,47 @@ class _LaundryPageState extends State<LaundryPage>
               animation: _animation,
               onCancel: _cancelSearch,
               onClear: _clearSearch,
+              onUpdate: _search(),
             ),
             SizedBox(height: 24),
             Expanded(
-              child: ListView.separated(
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical,
-                itemCount: widget.catalog.length,
-                separatorBuilder: (BuildContext context, int index) {
-                  return SizedBox(height: 16);
+              child: GestureDetector(
+                onTapUp: (TapUpDetails _) {
+                  _searchFocusNode.unfocus();
+                  _searchBloc.add(CloseSearchBar());
+                  if (_searchTextController.text == '') {
+                    _animationController.reverse();
+                  }
                 },
-                itemBuilder: (BuildContext context, int index) {
-                  return CategoryWidget(catalog: widget.catalog[index]);
-                },
+                child: BlocBuilder<SearchBloc, SearchState>(
+                  builder: (context, state) {
+                    if (state is SearchInitial)
+                      return _buildListView(widget.catalog);
+                    else if (state is NotSearching)
+                      return _buildListView(widget.catalog);
+                    else if (state is SearchedItems)
+                      return _buildListView(state.catalog);
+                  },
+                ),
               ),
             ),
-            // GestureDetector(
-            //   onTapUp: (TapUpDetails _) {
-            //     _searchFocusNode.unfocus();
-            //     if (_searchTextController.text == '') {
-            //       _animationController.reverse();
-            //     }
-            //   },
-            //   child: new Container(
-            //     height: 50,
-            //     color: CupertinoColors.destructiveRed,
-            //   ), // Add search body here
-            // ),
           ],
         ),
       ),
+    );
+  }
+
+  ListView _buildListView(List<Catalog> catalog) {
+    return ListView.separated(
+      shrinkWrap: true,
+      scrollDirection: Axis.vertical,
+      itemCount: catalog.length,
+      separatorBuilder: (BuildContext context, int index) {
+        return SizedBox(height: 16);
+      },
+      itemBuilder: (BuildContext context, int index) {
+        return CategoryWidget(catalog: catalog[index]);
+      },
     );
   }
 }

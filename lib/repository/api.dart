@@ -4,8 +4,10 @@ import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:flutter/widgets.dart';
 import 'package:laundry/helpers/secure_storage.dart';
 import 'package:laundry/models/catalog.dart';
+import 'package:laundry/models/categories.dart';
 import 'package:laundry/models/user.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -82,6 +84,14 @@ class LaundryRepo {
         options: options,
       );
 
+      if (response.statusCode == 400)
+        throw Exception('${response.data['non_fields_errors'][0]}');
+      else if (response.statusCode == 401) {
+        _storage.removeAuthToken();
+        throw Exception('Ошибка аутентификации');
+      } else if (response.statusCode == 403)
+        throw Exception('Ошибка авторизации');
+
       await _storage.writeAuthToken(value: response.data['key']);
     } on DioError catch (e) {
       if (e.response != null) {
@@ -149,7 +159,12 @@ class LaundryRepo {
 
       Response response = await _dio.get('catalog/', options: options);
 
-      var data = json.decode(json.encode(response.data).replaceAll('http', 'https'));
+      var data =
+          json.decode(json.encode(response.data).replaceAll('http', 'https'));
+          
+      data.forEach((element) {
+        element['itemCount'] = 0;
+      });
 
       if (response.statusCode == 200)
         return List<Catalog>.from(data.map((i) => Catalog.fromJson(i)));
@@ -172,7 +187,7 @@ class LaundryRepo {
     }
   }
 
-  Future<List<Object>> get getCategories async {
+  Future<List<Categories>> get getCategories async {
     try {
       final String csrftoken = await getCsrftoken();
       final String authtoken = await _storage.readAuthToken;
@@ -188,7 +203,8 @@ class LaundryRepo {
           await _dio.get('catalog/categories/', options: options);
 
       if (response.statusCode == 200)
-        return response.data;
+        return List<Categories>.from(
+            response.data.map((i) => Catalog.fromJson(i)));
       else
         throw Exception('Error occurred: ${response.data['detail']}');
     } on DioError catch (e) {

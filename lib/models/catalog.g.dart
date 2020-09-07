@@ -16,6 +16,7 @@ Catalog _$CatalogFromJson(Map<String, dynamic> json) {
     unit_price: json['unit_price'] as String,
     category: json['category'] as Map<String, dynamic>,
     uuid: json['uuid'] as String,
+    itemCount: json['itemCount'] as int,
   );
 }
 
@@ -28,4 +29,5 @@ Map<String, dynamic> _$CatalogToJson(Catalog instance) => <String, dynamic>{
       'unit_price': instance.unit_price,
       'category': instance.category,
       'uuid': instance.uuid,
+      'itemCount': instance.itemCount,
     };

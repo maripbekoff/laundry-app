@@ -3,14 +3,16 @@ part of 'cart_bloc.dart';
 @immutable
 abstract class CartEvent {}
 
+class CartUninitialized extends CartEvent {}
+
 class AddItem extends CartEvent {
-  final Catalog catalog;
+  Catalog catalog;
 
   AddItem({@required this.catalog});
 }
 
 class RemoveItem extends CartEvent {
-  final Catalog catalog;
+  Catalog catalog;
 
   RemoveItem({@required this.catalog});
 }

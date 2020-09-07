@@ -12,6 +12,10 @@
 ///       - asset: fonts/Laundry.ttf
 ///
 /// 
+/// * Entypo, Copyright (C) 2012 by Daniel Bruce
+///         Author:    Daniel Bruce
+///         License:   SIL (http://scripts.sil.org/OFL)
+///         Homepage:  http://www.entypo.com
 ///
 import 'package:flutter/widgets.dart';
 
@@ -24,4 +28,5 @@ class Laundry {
   static const IconData cart = IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData laundry = IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData profile = IconData(0xe802, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData help = IconData(0xe803, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }

@@ -57,7 +57,7 @@ class CategoryWidget extends StatelessWidget {
               width: 120,
               child: CachedNetworkImage(
                 imageUrl: '${catalog.category['image']}',
-                fit: BoxFit.fill,
+                fit: BoxFit.cover,
                 placeholder: (context, url) => CupertinoActivityIndicator(),
                 errorWidget: (context, url, error) =>
                     Icon(CupertinoIcons.ellipsis),

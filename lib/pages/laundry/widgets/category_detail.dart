@@ -21,7 +21,7 @@ class CategoryDetailPage extends StatelessWidget {
             return SizedBox(height: 16);
           },
           itemBuilder: (BuildContext context, int index) {
-            return ItemWidget(catalog: catalog);
+            return ItemWidget(catalog: catalog, isCartItem: false);
           },
         ),
       ),

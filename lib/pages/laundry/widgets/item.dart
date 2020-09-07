@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:laundry/blocs/cart/cart_bloc.dart';
 import 'package:laundry/models/catalog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:laundry/utils/icons/laundry_icons.dart';
 
 class ItemWidget extends StatelessWidget {
-  ItemWidget({Key key, @required this.catalog}) : super(key: key);
+  ItemWidget({Key key, @required this.catalog, this.isCartItem})
+      : super(key: key);
 
   Catalog catalog = Catalog();
-  CartBloc cartBloc;
+  CartBloc _cartBloc;
+  bool isCartItem = false;
 
   @override
   Widget build(BuildContext context) {
-    cartBloc = context.bloc<CartBloc>();
+    _cartBloc = context.bloc<CartBloc>();
 
     return Container(
       clipBehavior: Clip.antiAlias,
@@ -24,28 +27,6 @@ class ItemWidget extends StatelessWidget {
       height: 110,
       child: Stack(
         children: [
-          Positioned(
-            top: -16,
-            right: -16,
-            child: CupertinoButton(
-              onPressed: () {
-                return buildDescription(context);
-              },
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Color(0xFFEDEFF6),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(8),
-                  ),
-                ),
-                child: Icon(
-                  Icons.help_outline,
-                  color: Color(0xFFB0B3BC),
-                ),
-              ),
-            ),
-          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -86,34 +67,48 @@ class ItemWidget extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              CupertinoButton(
-                                minSize: 0,
-                                padding: EdgeInsets.zero,
-                                child: Icon(
-                                  CupertinoIcons.add_circled,
-                                  color: CupertinoColors.black,
-                                ),
-                                onPressed: () {
-                                  cartBloc.add(AddItem(catalog: catalog));
-                                },
-                              ),
-                              SizedBox(width: 5),
-                              Text('1'),
-                              SizedBox(width: 5),
-                              CupertinoButton(
-                                minSize: 0,
-                                padding: EdgeInsets.zero,
-                                child: Icon(
-                                  CupertinoIcons.minus_circled,
-                                  color: CupertinoColors.black,
-                                ),
-                                onPressed: () {
-                                  cartBloc.add(RemoveItem(catalog: catalog));
-                                },
-                              ),
-                            ],
+                          BlocConsumer<CartBloc, CartState>(
+                            listener: (context, state) {
+                              if (state is CartItemUpdated) {
+                                catalog = state.catalog.firstWhere(
+                                    (item) => item.uuid == catalog.uuid);
+                              } else if (state is CartEmpty) {
+                                catalog = state.catalog.firstWhere(
+                                    (item) => item.uuid == catalog.uuid);
+                              }
+                            },
+                            builder: (context, state) {
+                              return Row(
+                                children: [
+                                  CupertinoButton(
+                                    minSize: 0,
+                                    padding: EdgeInsets.zero,
+                                    child: Icon(
+                                      CupertinoIcons.add_circled,
+                                      color: CupertinoColors.black,
+                                    ),
+                                    onPressed: () {
+                                      _cartBloc.add(AddItem(catalog: catalog));
+                                    },
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text('${catalog.itemCount}'),
+                                  SizedBox(width: 5),
+                                  CupertinoButton(
+                                    minSize: 0,
+                                    padding: EdgeInsets.zero,
+                                    child: Icon(
+                                      CupertinoIcons.minus_circled,
+                                      color: CupertinoColors.black,
+                                    ),
+                                    onPressed: () {
+                                      _cartBloc
+                                          .add(RemoveItem(catalog: catalog));
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                           Text(
                             '${catalog.unit_price} тг',
@@ -127,7 +122,50 @@ class ItemWidget extends StatelessWidget {
               ),
             ],
           ),
+          _buildInfoButton(context, isCartItem),
+          isCartItem ? _buildRemoveButton(context) : Offstage(),
         ],
+      ),
+    );
+  }
+
+  Positioned _buildInfoButton(BuildContext context, bool isCartItem) {
+    return Positioned(
+      top: -16,
+      left: isCartItem ? -16 : null,
+      right: isCartItem ? null : -16,
+      child: CupertinoButton(
+        onPressed: () => buildDescription(context),
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Color(0xFFEDEFF6),
+            borderRadius: BorderRadius.only(
+              bottomLeft: isCartItem ? Radius.circular(0) : Radius.circular(12),
+              bottomRight:
+                  isCartItem ? Radius.circular(12) : Radius.circular(0),
+            ),
+          ),
+          child: Icon(Laundry.help, size: 16, color: Color(0xFFB0B3BC)),
+        ),
+      ),
+    );
+  }
+
+  Positioned _buildRemoveButton(BuildContext context) {
+    return Positioned(
+      top: -16,
+      right: -16,
+      child: CupertinoButton(
+        onPressed: () => _cartBloc.add(RemoveItem(catalog: catalog)),
+        child: Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: Color(0xFFEDEFF6),
+            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(12)),
+          ),
+          child: Icon(Icons.clear, size: 20, color: Color(0xFFB0B3BC)),
+        ),
       ),
     );
   }
@@ -160,8 +198,8 @@ class ItemWidget extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Color(0xFFEDEFF6),
                             borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(12),
-                              bottomLeft: Radius.circular(12),
+                              topRight: Radius.circular(10),
+                              bottomLeft: Radius.circular(10),
                             ),
                           ),
                           child: Icon(
